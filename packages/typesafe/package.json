@@ -1,0 +1,11 @@
+{
+  "name": "@repo/typesafe",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  }
+}
