@@ -130,28 +130,28 @@ export const notEqual =
     return Object.keys(a).some((key) => a[key] !== b[key]);
   };
 
-const schema = z.object({
-  users: z.object({
-    id: z.number(),
-    name: z.string(),
-    email: z.string(),
-    products: z
-      .array(z.object({ id: z.number(), name: z.string() }))
-      .optional(),
-  }),
-});
+// const schema = z.object({
+//   users: z.object({
+//     id: z.number(),
+//     name: z.string(),
+//     email: z.string(),
+//     products: z
+//       .array(z.object({ id: z.number(), name: z.string() }))
+//       .optional(),
+//   }),
+// });
 
-const db1 = createClient("test1", { schema });
+// const db1 = createClient("test1", { schema });
 
-db1.tables.users.query().where(contains({ name: "Alice" }));
+// db1.tables.users.query().where(contains({ name: "Alice" }));
 
-db1.tables.users.insert({
-  id: 1,
-  name: "Alice",
-  email: "alice@example.com",
-  products: [{ id: 1, name: "Product A" }],
-});
+// db1.tables.users.insert({
+//   id: 1,
+//   name: "Alice",
+//   email: "alice@example.com",
+//   products: [{ id: 1, name: "Product A" }],
+// });
 
-db1.tables.users.delete().where(equal({ id: 1 }));
-db1.tables.users.delete().where((user) => user.id === 1);
-db1.tables.users.update().where(equal({ id: 2 }), { name: "Bob Updated" });
+// db1.tables.users.delete().where(equal({ id: 1 }));
+// db1.tables.users.delete().where((user) => user.id === 1);
+// db1.tables.users.update().where(equal({ id: 2 }), { name: "Bob Updated" });

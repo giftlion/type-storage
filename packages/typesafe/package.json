@@ -8,5 +8,9 @@
   "dependencies": {
     "vitest": "^3.2.4",
     "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^20.19.21"
   }
 }

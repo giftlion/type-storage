@@ -104,10 +104,17 @@ importers:
     dependencies:
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4
+        version: 3.2.4(@types/node@20.19.21)
       zod:
         specifier: ^4.1.12
         version: 4.1.12
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.56.0
+        version: 1.56.0
+      '@types/node':
+        specifier: ^20.19.21
+        version: 20.19.21
 
   packages/typescript-config: {}
 
@@ -874,6 +881,14 @@ packages:
     engines: {node: '>=12.4.0'}
     dev: true
 
+  /@playwright/test@1.56.0:
+    resolution: {integrity: sha512-Tzh95Twig7hUwwNe381/K3PggZBZblKUe2wv25oIpzWLr6Z0m4KgV1ZVIjnR6GM9ANEqjZD7XsZEa6JL/7YEgg==}
+    engines: {node: '>=18'}
+    hasBin: true
+    dependencies:
+      playwright: 1.56.0
+    dev: true
+
   /@rollup/rollup-android-arm-eabi@4.52.4:
     resolution: {integrity: sha512-BTm2qKNnWIQ5auf4deoetINJm2JzvihvGb9R6K/ETwKLql/Bb3Eg2H1FBp1gUb4YGbydMA3jcmQTR73q7J+GAA==}
     cpu: [arm]
@@ -1255,7 +1270,6 @@ packages:
     resolution: {integrity: sha512-CsGG2P3I5y48RPMfprQGfy4JPRZ6csfC3ltBZSRItG3ngggmNY/qs2uZKp4p9VbrpqNNSMzUZNFZKzgOGnd/VA==}
     dependencies:
       undici-types: 6.21.0
-    dev: true
 
   /@types/node@22.18.10:
     resolution: {integrity: sha512-anNG/V/Efn/YZY4pRzbACnKxNKoBng2VTFydVu8RRs5hQjikP8CQfaeAV59VFSCzKNp90mXiVXW2QzV56rwMrg==}
@@ -1597,7 +1611,7 @@ packages:
       '@vitest/spy': 3.2.4
       estree-walker: 3.0.3
       magic-string: 0.30.19
-      vite: 7.1.10
+      vite: 7.1.10(@types/node@20.19.21)
     dev: false
 
   /@vitest/pretty-format@3.2.4:
@@ -2625,6 +2639,14 @@ packages:
       is-callable: 1.2.7
     dev: true
 
+  /fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+    requiresBuild: true
+    dev: true
+    optional: true
+
   /fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -3485,6 +3507,22 @@ packages:
     resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
     engines: {node: '>=12'}
 
+  /playwright-core@1.56.0:
+    resolution: {integrity: sha512-1SXl7pMfemAMSDn5rkPeZljxOCYAmQnYLBTExuh6E8USHXGSX3dx6lYZN/xPpTz1vimXmPA9CDnILvmJaB8aSQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+    dev: true
+
+  /playwright@1.56.0:
+    resolution: {integrity: sha512-X5Q1b8lOdWIE4KAoHpW3SE8HvUB+ZZsUoN64ZhjnN8dOb1UpujxBtENGiZFE+9F/yhzJwYa+ca3u43FeLbboHA==}
+    engines: {node: '>=18'}
+    hasBin: true
+    dependencies:
+      playwright-core: 1.56.0
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
+
   /possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
@@ -4192,7 +4230,6 @@ packages:
 
   /undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
-    dev: true
 
   /unrs-resolver@1.11.1:
     resolution: {integrity: sha512-bSjt9pjaEBnNiGgc9rUiHGKv5l4/TGzDmYw3RhnkJGtLhbnnA/5qJj7x3dNDCRx/PJxu774LlH8lCOlB4hEfKg==}
@@ -4227,7 +4264,7 @@ packages:
       punycode: 2.3.1
     dev: true
 
-  /vite-node@3.2.4:
+  /vite-node@3.2.4(@types/node@20.19.21):
     resolution: {integrity: sha512-EbKSKh+bh1E1IFxeO0pg1n4dvoOTt0UDiXMd/qn++r98+jPO1xtJilvXldeuQ8giIB5IkpjCgMleHMNEsGH6pg==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
@@ -4236,7 +4273,7 @@ packages:
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 7.1.10
+      vite: 7.1.10(@types/node@20.19.21)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -4252,7 +4289,7 @@ packages:
       - yaml
     dev: false
 
-  /vite@7.1.10:
+  /vite@7.1.10(@types/node@20.19.21):
     resolution: {integrity: sha512-CmuvUBzVJ/e3HGxhg6cYk88NGgTnBoOo7ogtfJJ0fefUWAxN/WDSUa50o+oVBxuIhO8FoEZW0j2eW7sfjs5EtA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
@@ -4292,6 +4329,7 @@ packages:
       yaml:
         optional: true
     dependencies:
+      '@types/node': 20.19.21
       esbuild: 0.25.11
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
@@ -4302,7 +4340,7 @@ packages:
       fsevents: 2.3.3
     dev: false
 
-  /vitest@3.2.4:
+  /vitest@3.2.4(@types/node@20.19.21):
     resolution: {integrity: sha512-LUCP5ev3GURDysTWiP47wRRUpLKMOfPh+yKTx3kVIEiu5KOMeqzpnYNsKyOoVrULivR8tLcks4+lga33Whn90A==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
@@ -4331,6 +4369,7 @@ packages:
         optional: true
     dependencies:
       '@types/chai': 5.2.2
+      '@types/node': 20.19.21
       '@vitest/expect': 3.2.4
       '@vitest/mocker': 3.2.4(vite@7.1.10)
       '@vitest/pretty-format': 3.2.4
@@ -4350,8 +4389,8 @@ packages:
       tinyglobby: 0.2.15
       tinypool: 1.1.1
       tinyrainbow: 2.0.0
-      vite: 7.1.10
-      vite-node: 3.2.4
+      vite: 7.1.10(@types/node@20.19.21)
+      vite-node: 3.2.4(@types/node@20.19.21)
       why-is-node-running: 2.3.0
     transitivePeerDependencies:
       - jiti
