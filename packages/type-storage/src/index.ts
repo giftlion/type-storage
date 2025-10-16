@@ -12,6 +12,7 @@ class Table<Row> {
   }
 
   private loadTableFromLocalStorage(): void {
+    if (typeof window === "undefined") return;
     const data = localStorage.getItem(
       `${this.DBname}-${String(this.tableName)}`
     );
