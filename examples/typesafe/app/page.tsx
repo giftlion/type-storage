@@ -1,7 +1,9 @@
-import { DB, where } from "@repo/typesafe";
+"use client";
+import { contain, createClient, equal, where } from "@repo/typesafe";
+import { useState } from "react";
 import { z } from "zod";
 
-const schema1 = z.object({
+const schema = z.object({
   users: z.object({
     id: z.number(),
     name: z.string(),
@@ -14,49 +16,72 @@ const schema1 = z.object({
   }),
 });
 
-const db = new DB("test1", schema1);
+const db = createClient("mydb", { schema });
 
 export default function Home() {
-  db.tables.users.insert({
-    id: 1,
-    name: "A",
-    email: "alice@example.com",
-  });
-
-  db.tables.users.insert({
-    id: 2,
-    name: "B",
-    email: "alice@example.com",
-  });
-
-  const data1 = db.tables.users.query();
-  console.log(data1);
-
-  // db.tables.users.delete((user) => user.id === 1);
-
-  const data2 = db.tables.users.query();
-  console.log(data2);
-
-  db.tables.users.delete(where({ id: 2 }));
-
-  const data3 = db.tables.users.query();
-  console.log(data3);
+  const [users, setUsers] = useState(db.tables.users.query());
 
   return (
     <div className="flex justify-center items-center flex-col min-h-screen py-2">
       <h1 className="text-4xl font-bold">Typesafe DB Example</h1>
-      <CompA />
-      <CompB />
+      <div className="mt-4">
+        <input
+          type="text"
+          placeholder="Search users by name"
+          className="border p-2 rounded w-full"
+          onChange={(e) => {
+            if (e.target.value === "") {
+              setUsers(db.tables.users.query());
+              return;
+            }
+            setUsers(
+              db.tables.users.query(where(contain({ name: e.target.value })))
+            );
+          }}
+        />
+      </div>
+      {users.map((user) => (
+        <div key={user.id} className="mt-4 p-4 border rounded w-1/3">
+          <div>
+            <p>
+              <strong>ID:</strong> {user.id}
+            </p>
+            <p>
+              <strong>Name:</strong> {user.name}
+            </p>
+            <p>
+              <strong>Email:</strong> {user.email}
+            </p>
+          </div>
+          <div>
+            <button
+              className="mt-2 px-4 py-2 bg-red-500 text-white rounded cursor-pointer"
+              onClick={() => {
+                db.tables.users.delete(where(equal({ id: user.id })));
+                setUsers(db.tables.users.query());
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ))}
+      <div>
+        <button
+          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
+          onClick={() => {
+            const newId = users.length + 1;
+            db.tables.users.insert({
+              id: newId,
+              name: `user ${newId}`,
+              email: `user${newId}@example.com`,
+            });
+            setUsers(db.tables.users.query());
+          }}
+        >
+          add user
+        </button>
+      </div>
     </div>
   );
 }
-
-const CompA = () => {
-  const name = db.tables.users.query()[0]?.name;
-  return <div>{name}</div>;
-};
-
-const CompB = () => {
-  const email = db.tables.users.query()[0]?.email;
-  return <div>{email}</div>;
-};

@@ -1,4 +1,4 @@
-import { DB, where } from "./index";
+import { DB, equal, where } from "./index";
 import { z } from "zod";
 import { expect, test } from "vitest";
 
@@ -38,24 +38,24 @@ test("DB operations", () => {
 
   expect(db.tables.users.query().length).toBe(3);
 
-  expect(db.tables.users.query(where({ id: 1 })).length).toBe(1);
-  
-  const UpdatedUser = db.tables.users.update(where({ id: 1 }), {
+  expect(db.tables.users.query(where(equal({ id: 1 }))).length).toBe(1);
+
+  const UpdatedUser = db.tables.users.update(where(equal({ id: 1 })), {
     name: "Alice Updated",
   });
 
   expect(UpdatedUser?.name).toBe("Alice Updated");
 
-  db.tables.users.delete(where({ id: 2 }));
+  db.tables.users.delete(where(equal({ id: 2 })));
 
   expect(db.tables.users.query().length).toBe(2);
 
-  db.tables.users.delete(where({ id: 1, name: "Alice Updated" }));
+  db.tables.users.delete(where(equal({ id: 1, name: "Alice Updated" })));
 
   expect(db.tables.users.query().length).toBe(1);
 
   //   shouldnt delete because name is different
-  db.tables.users.delete(where({ id: 3, name: "bla bla" }));
+  db.tables.users.delete(where(equal({ id: 3, name: "bla bla" })));
 
   expect(db.tables.users.query().length).toBe(1);
 });
