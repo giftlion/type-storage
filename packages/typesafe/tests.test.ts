@@ -38,7 +38,7 @@ test("DB operations", () => {
 
   expect(db.tables.users.query().length).toBe(3);
 
-  expect(db.tables.users.query(where(equal({ id: 1 }))).length).toBe(1);
+  expect(db.tables.users.query().where(equal({ id: 1 })).length).toBe(1);
 
   const UpdatedUser = db.tables.users.update(where(equal({ id: 1 })), {
     name: "Alice Updated",

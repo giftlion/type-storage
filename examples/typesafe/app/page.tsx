@@ -1,5 +1,5 @@
 "use client";
-import { contain, createClient, equal, where } from "@repo/typesafe";
+import { contains, createClient, equal } from "@repo/typesafe";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -19,7 +19,7 @@ const schema = z.object({
 const db = createClient("mydb", { schema });
 
 export default function Home() {
-  const [users, setUsers] = useState(db.tables.users.query());
+  const [users, setUsers] = useState(db.tables.users.query().all());
 
   return (
     <div className="flex justify-center items-center flex-col min-h-screen py-2">
@@ -31,11 +31,11 @@ export default function Home() {
           className="border p-2 rounded w-full"
           onChange={(e) => {
             if (e.target.value === "") {
-              setUsers(db.tables.users.query());
+              setUsers(db.tables.users.query().all());
               return;
             }
             setUsers(
-              db.tables.users.query(where(contain({ name: e.target.value })))
+              db.tables.users.query().where(contains({ name: e.target.value }))
             );
           }}
         />
@@ -57,8 +57,8 @@ export default function Home() {
             <button
               className="mt-2 px-4 py-2 bg-red-500 text-white rounded cursor-pointer"
               onClick={() => {
-                db.tables.users.delete(where(equal({ id: user.id })));
-                setUsers(db.tables.users.query());
+                db.tables.users.delete().where(equal({ id: user.id }));
+                setUsers(db.tables.users.query().all());
               }}
             >
               Delete
@@ -76,7 +76,7 @@ export default function Home() {
               name: `user ${newId}`,
               email: `user${newId}@example.com`,
             });
-            setUsers(db.tables.users.query());
+            setUsers(db.tables.users.query().all());
           }}
         >
           add user

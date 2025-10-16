@@ -2,82 +2,79 @@ import { z } from "zod";
 
 class Table<Row> {
   private table: Row[] = [];
+  private DBname: string;
+  private tableName: string | number | symbol;
 
-  public query(predicate?: (item: Row) => boolean): Row[] {
+  constructor(tableName: string | number | symbol, DBname: string) {
+    this.tableName = tableName;
+    this.DBname = DBname;
+    this.loadTableFromLocalStorage();
+  }
+
+  private loadTableFromLocalStorage(): void {
     const data = localStorage.getItem(
       `${this.DBname}-${String(this.tableName)}`
     );
     if (data) {
       this.table = JSON.parse(data);
+    } else {
+      this.table = [];
     }
-    if (predicate) {
-      return this.table.filter(predicate);
-    }
-    return this.table;
+  }
+
+  private saveTableToLocalStorage(): void {
+    localStorage.setItem(
+      `${this.DBname}-${String(this.tableName)}`,
+      JSON.stringify(this.table)
+    );
+  }
+
+  public query() {
+    this.loadTableFromLocalStorage();
+
+    return {
+      where: (predicate: (item: Row) => boolean) => {
+        return this.table.filter(predicate);
+      },
+      all: () => {
+        return this.table;
+      },
+    };
   }
 
   public insert(item: Row) {
-    const data = localStorage.getItem(
-      `${this.DBname}-${String(this.tableName)}`
-    );
-    if (data) {
-      this.table = JSON.parse(data);
-    }
-    localStorage.setItem(
-      `${this.DBname}-${String(this.tableName)}`,
-      JSON.stringify([...this.table, item])
-    );
+    this.loadTableFromLocalStorage();
     this.table = [...this.table, item];
+    this.saveTableToLocalStorage();
     return item;
   }
 
-  public delete(predicate: (item: Row) => boolean) {
-    const data = localStorage.getItem(
-      `${this.DBname}-${String(this.tableName)}`
-    );
-    if (data) {
-      this.table = JSON.parse(data);
-    }
-    const deletedRow = this.table.find(predicate);
-    const dataWithoutDeleted = this.table.filter((item) => !predicate(item));
-    localStorage.setItem(
-      `${this.DBname}-${String(this.tableName)}`,
-      JSON.stringify(dataWithoutDeleted)
-    );
-    this.table = dataWithoutDeleted;
-    return deletedRow;
+  public delete() {
+    this.loadTableFromLocalStorage();
+    const currentTable = this.table;
+    return {
+      where: (predicate: (item: Row) => boolean) => {
+        const deletedRow = currentTable.find(predicate);
+        this.table = currentTable.filter((item) => !predicate(item));
+        this.saveTableToLocalStorage();
+        return deletedRow;
+      },
+    };
   }
 
-  public update(predicate: (item: Row) => boolean, newItem: Partial<Row>) {
-    const data = localStorage.getItem(
-      `${this.DBname}-${String(this.tableName)}`
-    );
-    if (data) {
-      this.table = JSON.parse(data);
-    }
-    const index = this.table.findIndex(predicate);
-    if (index !== -1) {
-      localStorage.setItem(
-        `${this.DBname}-${String(this.tableName)}`,
-        JSON.stringify([
-          ...this.table.slice(0, index),
-          { ...this.table[index], ...newItem },
-          ...this.table.slice(index + 1),
-        ])
-      );
-      this.table[index] = { ...this.table[index], ...newItem };
-      return this.table[index];
-    }
-  }
-
-  constructor(
-    private tableName: string | number | symbol,
-    private DBname: string
-  ) {
-    this.table = [];
-    this.DBname = DBname;
-    this.tableName = tableName;
-    // localStorage.setItem(`${DBname}-${String(tableName)}`, JSON.stringify([]));
+  public update() {
+    this.loadTableFromLocalStorage();
+    const currentTable = this.table;
+    return {
+      where: (predicate: (item: Row) => boolean, newItem: Partial<Row>) => {
+        const index = currentTable.findIndex(predicate);
+        if (index !== -1) {
+          currentTable[index] = { ...currentTable[index], ...newItem };
+          this.saveTableToLocalStorage();
+          return currentTable[index];
+        }
+      },
+    };
   }
 }
 export class DB<T extends z.ZodObject> {
@@ -95,9 +92,10 @@ export class DB<T extends z.ZodObject> {
     if (schema) {
       const shape = schema.shape;
       for (const tableName of Object.keys(shape) as Array<keyof z.infer<T>>) {
-        this.tables[tableName] = new Table<any>(tableName, this.name) as Table<
-          z.infer<T>[typeof tableName]
-        >;
+        this.tables[tableName] = new Table<any>(
+          tableName as string,
+          this.name
+        ) as Table<z.infer<T>[typeof tableName]>;
       }
     }
   }
@@ -110,9 +108,7 @@ export const createClient = <T extends z.ZodObject>(
   return new DB(name, schema);
 };
 
-export const where = <A extends Record<string, any>>(
-  predicate: (item: A) => boolean
-) => {
+export const where = <A>(predicate: (item: A) => boolean) => {
   return predicate;
 };
 
@@ -122,13 +118,13 @@ export const equal =
     return Object.keys(a).every((key) => a[key] === b[key]);
   };
 
-export const contain =
+export const contains =
   <A extends Record<string, any>>(a: A) =>
   (b: A) => {
     return Object.keys(a).every((key) => b[key]?.includes(a[key]));
   };
 
-export const notEqual = 
+export const notEqual =
   <A extends Record<string, any>>(a: A) =>
   (b: A) => {
     return Object.keys(a).some((key) => a[key] !== b[key]);
@@ -147,7 +143,7 @@ const schema = z.object({
 
 const db1 = createClient("test1", { schema });
 
-db1.tables.users.query();
+db1.tables.users.query().where(contains({ name: "Alice" }));
 
 db1.tables.users.insert({
   id: 1,
@@ -156,5 +152,6 @@ db1.tables.users.insert({
   products: [{ id: 1, name: "Product A" }],
 });
 
-db1.tables.users.delete(where(equal({ id: 1 })));
-db1.tables.users.update(where(equal({ id: 2 })), { name: "Bob" });
+db1.tables.users.delete().where(equal({ id: 1 }));
+db1.tables.users.delete().where((user) => user.id === 1);
+db1.tables.users.update().where(equal({ id: 2 }), { name: "Bob Updated" });
