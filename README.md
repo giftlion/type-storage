@@ -1,42 +1,28 @@
-# my-engine
+# @giftlion/type-storage
 
-Lightweight monorepo containing a tiny typesafe, localStorage-backed in-memory DB used for demos and tests.
+Small TypeScript library inspired by trpc/drizzle api that provides a tiny, typesafe in-memory DB with a per-table `localStorage` backing. It uses `zod` for schema declaration and runtime typing.
 
-This workspace contains a single package of interest for now:
+Usage
 
-- `packages/typesafe` — a small TypeScript library that exposes a `DB` and `Table` abstraction built on top of `localStorage` and `zod` schemas. It's useful for browser-focused demos and tests that rely on a DOM-like environment.
+Installation
 
-Files and folders
+```shell
+npm i @giftlion/type-storage
 
-- `packages/typesafe` — the typesafe DB implementation and tests.
-- `examples/typesafe` — a small Next.js example (mostly scaffolding).
-
-Quick start
-
-1. Install dependencies (pnpm workspace):
-
-```powershell
-pnpm install
 ```
 
-2. Run the tests for the `typesafe` package (the tests require a DOM-like environment for `localStorage`):
+The library is designed to run in a browser environment where `localStorage` exists. Minimal example:
 
-```powershell
-pnpm --filter @repo/typesafe test -- --environment jsdom
+```ts
+import { createClient } from " @giftlion/type-storage";
+import { z } from "zod";
+
+const schema = z.object({
+  users: z.object({ id: z.number(), name: z.string() }),
+});
+
+const db = createClient("app-db", { schema });
+
+db.tables.users.insert({ id: 1, name: "Alice" });
+console.log(db.tables.users.query().all());
 ```
-
-If you prefer running Vitest directly from the package folder:
-
-```powershell
-cd packages/typesafe
-pnpm test -- --environment jsdom
-```
-
-Notes
-
-- The `typesafe` package uses `localStorage` at runtime. For Node-based tests you must run in a DOM-like environment (Vitest's `jsdom`), or provide a `localStorage` polyfill (see `packages/typesafe/README.md` for examples).
-- The library is intentionally tiny and demonstrates a pattern of coupling zod-validated schemas with a simple per-table storage layer.
-
-See the package-specific README for API docs and usage examples:
-
-packages/typesafe/README.md
