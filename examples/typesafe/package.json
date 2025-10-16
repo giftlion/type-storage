@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@repo/typesafe": "workspace:*",
+    "type-storage": "workspace:*",
     "next": "15.5.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",

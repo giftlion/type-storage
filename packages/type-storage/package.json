@@ -1,16 +1,15 @@
 {
-  "name": "@repo/typesafe",
+  "name": "type-storage",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "vitest"
   },
   "dependencies": {
-    "vitest": "^3.2.4",
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@playwright/test": "^1.56.0",
-    "@types/node": "^20.19.21"
+    "@types/node": "^20.19.21",
+    "vitest": "^3.2.4"
   }
 }

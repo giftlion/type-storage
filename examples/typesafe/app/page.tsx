@@ -1,5 +1,5 @@
 "use client";
-import { contains, createClient, equal } from "@repo/typesafe";
+import { contains, createClient, equal } from "type-storage";
 import { useState } from "react";
 import { z } from "zod";
 
