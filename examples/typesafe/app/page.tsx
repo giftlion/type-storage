@@ -8,18 +8,16 @@ const schema = z.object({
     id: z.number(),
     name: z.string(),
     email: z.string(),
-  }),
-  products: z.object({
-    id: z.number(),
-    name: z.string(),
-    price: z.number().min(0),
+    products: z.array(z.string()).optional(),
   }),
 });
 
 const db = createClient("mydb", { schema });
 
 export default function Home() {
-  const [users, setUsers] = useState(db.tables.users.query().all());
+  const [users, setUsers] = useState(
+    db.tables.users.query().select({ id: true, name: true, email: true }).data
+  );
 
   return (
     <div className="flex justify-center items-center flex-col min-h-screen py-2">
@@ -31,11 +29,12 @@ export default function Home() {
           className="border p-2 rounded w-full"
           onChange={(e) => {
             if (e.target.value === "") {
-              setUsers(db.tables.users.query().all());
+              setUsers(db.tables.users.query().data);
               return;
             }
             setUsers(
               db.tables.users.query().where(contains({ name: e.target.value }))
+                .data
             );
           }}
         />
@@ -58,7 +57,7 @@ export default function Home() {
               className="mt-2 px-4 py-2 bg-red-500 text-white rounded cursor-pointer"
               onClick={() => {
                 db.tables.users.delete().where(equal({ id: user.id }));
-                setUsers(db.tables.users.query().all());
+                setUsers(db.tables.users.query().data);
               }}
             >
               Delete
@@ -76,7 +75,7 @@ export default function Home() {
               name: `user ${newId}`,
               email: `user${newId}@example.com`,
             });
-            setUsers(db.tables.users.query().all());
+            setUsers(db.tables.users.query().data);
           }}
         >
           add user

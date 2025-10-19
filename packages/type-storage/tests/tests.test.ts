@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { createClient, equal } from "../index.js";
+import { createClient, equal } from "../src/index";
 import z from "zod";
 
 test("DB operations with localStorage mock", async () => {
@@ -30,21 +30,37 @@ test("DB operations with localStorage mock", async () => {
 
   const db = createClient("mydb", { schema });
 
-  db.tables.users.insert({ id: 1, name: "Alice", email: "alice@example.com" });
-  db.tables.users.insert({ id: 2, name: "Bob", email: "bob@example.com" });
+  db.tables.users.insert({
+    id: 1,
+    name: "Alice",
+    email: "alice@example.com",
+  });
+  db.tables.users.insert({
+    id: 2,
+    name: "Bob",
+    email: "bob@example.com",
+  });
 
-  const allUsers = db.tables.users.query().all();
-  const user1 = db.tables.users.query().where(equal({ id: 1 }));
+  const { data: allUsers } = db.tables.users.query();
+
+  const { data: userA } = db.tables.users.query().where(equal({ id: 1 }));
+
+  // there is no user id 10
+  const { error: noIdError } = db.tables.users
+    .delete()
+    .where(equal({ id: 10 }));
 
   db.tables.users.delete().where(equal({ id: 2 }));
-  const remainingUsers = db.tables.users.query().all();
 
-  const updatedUser = db.tables.users
+  const { data: remainingUsers } = db.tables.users.query();
+
+  const { data: updatedUser } = db.tables.users
     .update()
     .where(equal({ id: 1 }), { name: "Alice Updated" });
 
-  expect(updatedUser?.name).toBe("Alice Updated");
   expect(allUsers.length).toBe(2);
-  expect(user1[0]?.name).toBe("Alice");
+  expect(userA[0].name).toBe("Alice");
+  expect(noIdError).toBeDefined();
   expect(remainingUsers.length).toBe(1);
+  expect(updatedUser.name).toBe("Alice Updated");
 });
