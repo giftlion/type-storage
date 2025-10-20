@@ -24,7 +24,7 @@ importers:
 
   examples/typesafe:
     dependencies:
-      '@giftlion/type-storage':
+      '@giftlion/typed-storage':
         specifier: workspace:*
         version: link:../../packages/type-storage
       next:
