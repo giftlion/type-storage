@@ -61,7 +61,7 @@ class MultiQuery<Row> extends BaseQuery<Row[]> {
     );
     return new MultiQueryAfterSelect<FilterByTrue<Row, Keys>>(
       selectedData,
-      this._error, 
+      this._error,
       this.storageKey
     );
   }
@@ -82,7 +82,11 @@ class MultiQueryAfterWhere<Row> extends BaseQuery<Row[]> {
 
 class MultiQueryAfterSelect<Row> extends BaseQuery<Row[]> {
   where(predicate: (item: Row) => boolean) {
-    return new MultiQueryFinal<Row>(this._data.filter(predicate), this._error, this.storageKey);
+    return new MultiQueryFinal<Row>(
+      this._data.filter(predicate),
+      this._error,
+      this.storageKey
+    );
   }
 }
 
@@ -110,10 +114,10 @@ class Table<Row> {
   }
 
   private saveTableToLocalStorage(): void {
-    const key = this.getStorageKey();
-    localStorage.setItem(key, JSON.stringify(this.table));
-
     if (typeof window !== "undefined") {
+      const key = this.getStorageKey();
+      localStorage.setItem(key, JSON.stringify(this.table));
+
       window.dispatchEvent(
         new CustomEvent("local-storage-change", {
           detail: { key },
@@ -148,9 +152,13 @@ class Table<Row> {
       where: (predicate: (item: Row) => boolean) => {
         const deletedRow = currentTable.find(predicate);
         if (!deletedRow) {
-          return new SingleQuery<Row>(null as any, {
-            message: "No matching row found to delete.",
-          }, this.getStorageKey());
+          return new SingleQuery<Row>(
+            null as any,
+            {
+              message: "No matching row found to delete.",
+            },
+            this.getStorageKey()
+          );
         }
         this.table = currentTable.filter((item) => !predicate(item));
         this.saveTableToLocalStorage();
@@ -166,13 +174,21 @@ class Table<Row> {
       where: (predicate: (item: Row) => boolean) => {
         const deletedRows = currentTable.filter(predicate);
         if (deletedRows.length === 0) {
-          return new MultiQueryAfterWhere<Row>([], {
-            message: "No matching rows found to delete.",
-          }, this.getStorageKey());
+          return new MultiQueryAfterWhere<Row>(
+            [],
+            {
+              message: "No matching rows found to delete.",
+            },
+            this.getStorageKey()
+          );
         }
         this.table = currentTable.filter((item) => !predicate(item));
         this.saveTableToLocalStorage();
-        return new MultiQueryAfterWhere<Row>(deletedRows, null, this.getStorageKey());
+        return new MultiQueryAfterWhere<Row>(
+          deletedRows,
+          null,
+          this.getStorageKey()
+        );
       },
     };
   }
@@ -184,13 +200,21 @@ class Table<Row> {
       where: (predicate: (item: Row) => boolean, newItem: Partial<Row>) => {
         const index = currentTable.findIndex(predicate);
         if (index === -1) {
-          return new SingleQuery<Row>(null as any, {
-            message: "No matching row found to update.",
-          }, this.getStorageKey());
+          return new SingleQuery<Row>(
+            null as any,
+            {
+              message: "No matching row found to update.",
+            },
+            this.getStorageKey()
+          );
         }
         currentTable[index] = { ...currentTable[index], ...newItem };
         this.saveTableToLocalStorage();
-        return new SingleQuery<Row>(currentTable[index], null, this.getStorageKey());
+        return new SingleQuery<Row>(
+          currentTable[index],
+          null,
+          this.getStorageKey()
+        );
       },
     };
   }
@@ -211,13 +235,21 @@ class Table<Row> {
         });
 
         if (updatedRows.length === 0) {
-          return new MultiQueryAfterWhere<Row>([], {
-            message: "No matching rows found to update.",
-          }, this.getStorageKey());
+          return new MultiQueryAfterWhere<Row>(
+            [],
+            {
+              message: "No matching rows found to update.",
+            },
+            this.getStorageKey()
+          );
         }
 
         this.saveTableToLocalStorage();
-        return new MultiQueryAfterWhere<Row>(updatedRows, null, this.getStorageKey());
+        return new MultiQueryAfterWhere<Row>(
+          updatedRows,
+          null,
+          this.getStorageKey()
+        );
       },
     };
   }
@@ -271,5 +303,3 @@ export const notEqual =
   <A extends Record<string, any>>(a: Partial<A>) =>
   (b: A): boolean =>
     Object.keys(a).some((key) => a[key] !== b[key]);
-
-
