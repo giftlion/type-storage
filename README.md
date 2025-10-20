@@ -1,4 +1,4 @@
-# @giftlion/type-storage
+# @giftlion/typed-storage
 
 A lightweight, type-safe localStorage wrapper with a SQL-like query API for TypeScript and React applications.
 
@@ -13,7 +13,7 @@ A lightweight, type-safe localStorage wrapper with a SQL-like query API for Type
 
 ## Installation
 ```bash
-npm install @giftlion/type-storage zod
+npm install @giftlion/typed-storage zod
 ```
 
 ## Quick Start
@@ -76,7 +76,7 @@ db.users.delete().where((user) => user.id === 1);
 
 Use the `useLiveStorage` hook to automatically re-render components when data changes:
 ```typescript
-import { useLiveStorage } from "@giftlion/type-storage/react";
+import { useLiveStorage } from "@giftlion/typed-storage/react";
 import { db } from "./db";
 
 function UserList() {
@@ -167,7 +167,7 @@ db.users.deleteMany().where((user) => user.age < 18);
 
 ### Helper Functions
 ```typescript
-import { equal, contains, notEqual } from "@giftlion/type-storage";
+import { equal, contains, notEqual } from "@giftlion/typed-storage";
 
 // Exact match
 db.users.query().where(equal({ id: 1 }))
