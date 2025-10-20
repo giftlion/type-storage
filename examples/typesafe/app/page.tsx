@@ -1,6 +1,6 @@
 "use client";
-import { createClient, equal } from "@giftlion/type-storage";
-import { useLiveStorage } from "@giftlion/type-storage/react";
+import { createClient, equal } from "@giftlion/typed-storage";
+import { useLiveStorage } from "@giftlion/typed-storage/react";
 import { z } from "zod";
 
 const schema = z.object({

@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@giftlion/type-storage": "workspace:*",
+    "@giftlion/typed-storage": "workspace:*",
     "next": "15.5.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
