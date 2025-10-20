@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { createClient, equal } from "../src/index";
 import z from "zod";
 
+
 test("DB operations with localStorage mock", async () => {
   // Mock localStorage
   const storage: Record<string, string> = {};
