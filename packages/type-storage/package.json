@@ -2,23 +2,33 @@
   "name": "@giftlion/type-storage",
   "version": "0.1.2",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.js",
+      "types": "./dist/react/index.d.ts"
+    }
+  },
   "files": [
     "dist/**"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup src --format cjs,esm --dts",
     "test": "vitest"
-
   },
   "dependencies": {
+    "react": "19.1.0",
     "tsup": "^8.5.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/node": "^20.19.21",
+    "@types/react": "^19",
     "vitest": "^3.2.4"
   }
 }

@@ -70,6 +70,9 @@ importers:
 
   packages/type-storage:
     dependencies:
+      react:
+        specifier: 19.1.0
+        version: 19.1.0
       tsup:
         specifier: ^8.5.0
         version: 8.5.0(typescript@5.9.2)
@@ -80,6 +83,9 @@ importers:
       '@types/node':
         specifier: ^20.19.21
         version: 20.19.21
+      '@types/react':
+        specifier: ^19
+        version: 19.1.0
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@20.19.21)

@@ -30,31 +30,29 @@ test("DB operations with localStorage mock", async () => {
 
   const db = createClient("mydb", { schema });
 
-  db.tables.users.insert({
+  db.users.insert({
     id: 1,
     name: "Alice",
     email: "alice@example.com",
   });
-  db.tables.users.insert({
+  db.users.insert({
     id: 2,
     name: "Bob",
     email: "bob@example.com",
   });
 
-  const { data: allUsers } = db.tables.users.query();
+  const { data: allUsers } = db.users.query();
 
-  const { data: userA } = db.tables.users.query().where(equal({ id: 1 }));
+  const { data: userA } = db.users.query().where(equal({ id: 1 }));
 
   // there is no user id 10
-  const { error: noIdError } = db.tables.users
-    .delete()
-    .where(equal({ id: 10 }));
+  const { error: noIdError } = db.users.delete().where(equal({ id: 10 }));
 
-  db.tables.users.delete().where(equal({ id: 2 }));
+  db.users.delete().where(equal({ id: 2 }));
 
-  const { data: remainingUsers } = db.tables.users.query();
+  const { data: remainingUsers } = db.users.query();
 
-  const { data: updatedUser } = db.tables.users
+  const { data: updatedUser } = db.users
     .update()
     .where(equal({ id: 1 }), { name: "Alice Updated" });
 

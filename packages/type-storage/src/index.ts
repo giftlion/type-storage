@@ -1,19 +1,11 @@
 import { z } from "zod";
-import { Prettify } from "./types";
-
-type FilterByTrue<
-  T,
-  Keys extends Partial<Record<keyof T, boolean>>,
-> = Prettify<{
-  [K in keyof Keys as Keys[K] extends true ? K : never]: K extends keyof T
-    ? T[K]
-    : never;
-}>;
+import { FilterByTrue } from "./types";
 
 abstract class BaseQuery<T> {
   constructor(
     protected _data: T,
-    protected _error: any = null
+    protected _error: any = null,
+    protected strorageKey: string
   ) {}
 
   get data(): T {
@@ -22,6 +14,10 @@ abstract class BaseQuery<T> {
 
   get error() {
     return this._error;
+  }
+
+  get storageKey(): string {
+    return this.strorageKey;
   }
 
   protected selectFields<Row, Keys extends Partial<Record<keyof Row, boolean>>>(
@@ -42,7 +38,8 @@ class SingleQuery<Row> extends BaseQuery<Row> {
   select<Keys extends Partial<Record<keyof Row, boolean>>>(keys: Keys) {
     return new SingleQueryFinal<FilterByTrue<Row, Keys>>(
       this.selectFields(this._data, keys),
-      this._error
+      this._error,
+      this.storageKey
     );
   }
 }
@@ -53,7 +50,8 @@ class MultiQuery<Row> extends BaseQuery<Row[]> {
   where(predicate: (item: Row) => boolean) {
     return new MultiQueryAfterWhere<Row>(
       this._data.filter(predicate),
-      this._error
+      this._error,
+      this.storageKey
     );
   }
 
@@ -63,7 +61,8 @@ class MultiQuery<Row> extends BaseQuery<Row[]> {
     );
     return new MultiQueryAfterSelect<FilterByTrue<Row, Keys>>(
       selectedData,
-      this._error
+      this._error, 
+      this.storageKey
     );
   }
 }
@@ -75,14 +74,15 @@ class MultiQueryAfterWhere<Row> extends BaseQuery<Row[]> {
     );
     return new MultiQueryFinal<FilterByTrue<Row, Keys>>(
       selectedData,
-      this._error
+      this._error,
+      this.storageKey
     );
   }
 }
 
 class MultiQueryAfterSelect<Row> extends BaseQuery<Row[]> {
   where(predicate: (item: Row) => boolean) {
-    return new MultiQueryFinal<Row>(this._data.filter(predicate), this._error);
+    return new MultiQueryFinal<Row>(this._data.filter(predicate), this._error, this.storageKey);
   }
 }
 
@@ -99,38 +99,46 @@ class Table<Row> {
     this.loadTableFromLocalStorage();
   }
 
+  private getStorageKey(): string {
+    return `${this.DBname}-${String(this.tableName)}`;
+  }
+
   private loadTableFromLocalStorage(): void {
     if (typeof window === "undefined") return;
-    const data = localStorage.getItem(
-      `${this.DBname}-${String(this.tableName)}`
-    );
+    const data = localStorage.getItem(this.getStorageKey());
     this.table = data ? JSON.parse(data) : [];
   }
 
   private saveTableToLocalStorage(): void {
-    localStorage.setItem(
-      `${this.DBname}-${String(this.tableName)}`,
-      JSON.stringify(this.table)
-    );
+    const key = this.getStorageKey();
+    localStorage.setItem(key, JSON.stringify(this.table));
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("local-storage-change", {
+          detail: { key },
+        })
+      );
+    }
   }
 
   public query() {
     this.loadTableFromLocalStorage();
-    return new MultiQuery<Row>(this.table);
+    return new MultiQuery<Row>(this.table, null, this.getStorageKey());
   }
 
   public insert(item: Row) {
     this.loadTableFromLocalStorage();
     this.table = [...this.table, item];
     this.saveTableToLocalStorage();
-    return new SingleQuery<Row>(item);
+    return new SingleQuery<Row>(item, null, this.getStorageKey());
   }
 
   public insertMany(items: Row[]) {
     this.loadTableFromLocalStorage();
     this.table = [...this.table, ...items];
     this.saveTableToLocalStorage();
-    return new MultiQueryAfterWhere<Row>(items);
+    return new MultiQueryAfterWhere<Row>(items, null, this.getStorageKey());
   }
 
   public delete() {
@@ -142,11 +150,11 @@ class Table<Row> {
         if (!deletedRow) {
           return new SingleQuery<Row>(null as any, {
             message: "No matching row found to delete.",
-          });
+          }, this.getStorageKey());
         }
         this.table = currentTable.filter((item) => !predicate(item));
         this.saveTableToLocalStorage();
-        return new SingleQuery<Row>(deletedRow);
+        return new SingleQuery<Row>(deletedRow, null, this.getStorageKey());
       },
     };
   }
@@ -160,11 +168,11 @@ class Table<Row> {
         if (deletedRows.length === 0) {
           return new MultiQueryAfterWhere<Row>([], {
             message: "No matching rows found to delete.",
-          });
+          }, this.getStorageKey());
         }
         this.table = currentTable.filter((item) => !predicate(item));
         this.saveTableToLocalStorage();
-        return new MultiQueryAfterWhere<Row>(deletedRows);
+        return new MultiQueryAfterWhere<Row>(deletedRows, null, this.getStorageKey());
       },
     };
   }
@@ -178,11 +186,11 @@ class Table<Row> {
         if (index === -1) {
           return new SingleQuery<Row>(null as any, {
             message: "No matching row found to update.",
-          });
+          }, this.getStorageKey());
         }
         currentTable[index] = { ...currentTable[index], ...newItem };
         this.saveTableToLocalStorage();
-        return new SingleQuery<Row>(currentTable[index]);
+        return new SingleQuery<Row>(currentTable[index], null, this.getStorageKey());
       },
     };
   }
@@ -205,11 +213,11 @@ class Table<Row> {
         if (updatedRows.length === 0) {
           return new MultiQueryAfterWhere<Row>([], {
             message: "No matching rows found to update.",
-          });
+          }, this.getStorageKey());
         }
 
         this.saveTableToLocalStorage();
-        return new MultiQueryAfterWhere<Row>(updatedRows);
+        return new MultiQueryAfterWhere<Row>(updatedRows, null, this.getStorageKey());
       },
     };
   }
@@ -221,7 +229,7 @@ export class DB<T extends z.ZodObject> {
   };
 
   constructor(
-    public name: string,
+    private name: string,
     private schema: T
   ) {
     this.name = name;
@@ -243,10 +251,8 @@ export const createClient = <T extends z.ZodObject>(
   name: string,
   { schema }: { schema: T }
 ) => {
-  return new DB(name, schema);
+  return new DB(name, schema).tables;
 };
-
-export const where = <A>(predicate: (item: A) => boolean) => predicate;
 
 export const equal =
   <A extends Record<string, any>>(a: Partial<A>) =>
@@ -266,48 +272,4 @@ export const notEqual =
   (b: A): boolean =>
     Object.keys(a).some((key) => a[key] !== b[key]);
 
-// const schema = z.object({
-//   users: z.object({
-//     id: z.number(),
-//     name: z.string(),
-//     email: z.string(),
-//     products: z
-//       .array(z.object({ id: z.number(), name: z.string() }))
-//       .optional(),
-//   }),
-// });
 
-// const db1 = createClient("test1", { schema });
-
-// const { data, error } = db1.tables.users
-//   .insert({
-//     id: 1,
-//     email: "fdd",
-//     name: "ASd",
-//   })
-//   .select({ name: true });
-// const { data: d } = db1.tables.users
-//   .insertMany([
-//     {
-//       id: 1,
-//       email: "fdd",
-//       name: "ASd",
-//     },
-//   ])
-//   .select({ name: true });
-
-// const { data: a } = db1.tables.users
-//   .delete()
-//   .where((u) => u.id === 1)
-//   .select({ email: true });
-
-// const { data: b } = db1.tables.users.query().select({ email: true });
-
-// const { data: c } = db1.tables.users
-//   .query()
-//   .where((u) => u.id > 5)
-//   .select({ email: true });
-// const { data: aa } = db1.tables.users
-//   .query()
-//   .select({ email: true })
-//   .where((u) => u.email.includes("@"));
