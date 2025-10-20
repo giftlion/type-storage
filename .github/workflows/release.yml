@@ -1,0 +1,60 @@
+name: Release to npm on main
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write # allow committing version bumps
+  id-token: write # for npm provenance (optional)
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Configure Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Version packages with Changesets
+        run: pnpm changeset version
+
+      - name: Commit and push version changes
+        run: |
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "chore(release): version packages [skip ci]"
+            git push
+          fi
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+        run: pnpm changeset publish
+
+
