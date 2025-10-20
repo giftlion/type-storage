@@ -1,6 +1,6 @@
 {
-  "name": "@giftlion/type-storage",
-  "version": "0.1.2",
+  "name": "@giftlion/typed-storage",
+  "version": "0.0.1",
   "type": "module",
   "exports": {
     ".": {
