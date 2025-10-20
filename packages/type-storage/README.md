@@ -80,7 +80,7 @@ import { useLiveStorage } from "@giftlion/typed-storage/react";
 import { db } from "./db";
 
 function UserList() {
-  const { data: users } = useLiveStorage(db.users.query);
+  const { data: users } = useLiveStorage(() => db.users.query());
 
   return (
     <ul>
