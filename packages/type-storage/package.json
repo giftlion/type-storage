@@ -30,5 +30,16 @@
     "@types/node": "^20.19.21",
     "@types/react": "^19",
     "vitest": "^3.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/giftlion/type-storage"
+  },
+  "homepage": "https://github.com/giftlion/type-storage#readme",
+  "bugs": {
+    "url": "https://github.com/giftlion/type-storage/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
